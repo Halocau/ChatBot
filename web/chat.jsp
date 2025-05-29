@@ -5,42 +5,92 @@
     <meta charset="UTF-8">
     <title>Gemini Chatbot</title>
     <style>
+        :root {
+            --main-color: #2e7d32; /* Xanh đậm lá cây */
+            --text-color: #fff;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+        }
+
         #chat-toggle-btn {
             position: fixed;
-            bottom: 80px;
-            right: 20px;
-            background-color: white;
+            bottom: 100px;
+            right: 30px;
+            background-color: var(--main-color);
             border: none;
             border-radius: 50%;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            width: 50px;
-            height: 50px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            width: 60px;
+            height: 60px;
             cursor: pointer;
             z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #chat-toggle-btn img {
+            width: 28px;
+            height: 28px;
+            filter: brightness(0) invert(1);
         }
 
         #chat-popup {
             position: fixed;
-            bottom: 140px;
-            right: 20px;
-            width: 300px;
-            max-height: 400px;
+            bottom: 170px;
+            right: 30px;
+            width: 330px;
+            height: 400px;
             background-color: #fff;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 10px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
             display: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            flex-direction: column;
+            overflow: hidden;
             z-index: 999;
+            border: 2px solid var(--main-color);
         }
 
         #chatBox {
-            height: 250px;
+            flex: 1;
             overflow-y: auto;
-            padding: 10px;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
+            padding: 16px;
+            font-size: 15px;
             color: #333;
+        }
+
+        #chatBox div {
+            margin-bottom: 12px;
+        }
+
+        #chat-popup input[type="text"] {
+            width: calc(100% - 90px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        #chat-popup button.send-btn {
+            padding: 10px 14px;
+            margin-left: 6px;
+            margin-right: 10px;
+            background-color: var(--main-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        #chat-footer {
+            display: flex;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            align-items: center;
         }
     </style>
 </head>
@@ -48,20 +98,22 @@
 
 <!-- Nút bật/tắt chat -->
 <button id="chat-toggle-btn" onclick="toggleChat()">
-    <img src="./images/mess.png" style="width:24px;">
+    <img src="./images/mess.png" alt="Chat">
 </button>
 
 <!-- Popup chat -->
 <div id="chat-popup">
     <div id="chatBox"></div>
-    <input type="text" id="userInput" placeholder="Type..." style="width:75%;" onkeydown="if (event.key === 'Enter') sendMessage();">
-    <button onclick="sendMessage()">Send</button>
+    <div id="chat-footer">
+        <input type="text" id="userInput" placeholder="Nhập nội dung..." onkeydown="if (event.key === 'Enter') sendMessage();">
+        <button class="send-btn" onclick="sendMessage()">Gửi</button>
+    </div>
 </div>
 
 <script>
     function toggleChat() {
         const chatPopup = document.getElementById("chat-popup");
-        chatPopup.style.display = (chatPopup.style.display === "none" || chatPopup.style.display === "") ? "block" : "none";
+        chatPopup.style.display = (chatPopup.style.display === "none" || chatPopup.style.display === "") ? "flex" : "none";
     }
 
     function sendMessage() {
@@ -75,8 +127,6 @@
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 const response = JSON.parse(xhr.responseText);
-                console.log("Gemini API response: ", response);
-
                 let botReply = response.reply || "(Không có phản hồi từ bot)";
                 botReply = botReply.trim();
 
@@ -86,21 +136,21 @@
 
                 const chatBox = document.getElementById("chatBox");
 
-                // Tạo phần tử HTML an toàn (tránh lỗi insertAdjacentHTML)
+                // Tạo phần tử người dùng
                 const userDiv = document.createElement("div");
-                userDiv.style.marginBottom = "8px";
                 userDiv.innerHTML = `<b>You:</b><br>`;
                 const userText = document.createElement("span");
                 userText.innerText = userInput;
                 userDiv.appendChild(userText);
 
+                // Tạo phần tử bot
                 const botDiv = document.createElement("div");
-                botDiv.style.marginBottom = "8px";
                 botDiv.innerHTML = `<b>Bot:</b><br>`;
                 const botText = document.createElement("span");
                 botText.innerHTML = formatted;
                 botDiv.appendChild(botText);
 
+                // Thêm vào chat
                 chatBox.appendChild(userDiv);
                 chatBox.appendChild(botDiv);
 
